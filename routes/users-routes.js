@@ -1,4 +1,5 @@
 const express = require('express')
+const uuid = require('uuid/v4')
 
 const router = express.Router()
 
@@ -26,6 +27,31 @@ const DUMMY_USERS = [
 router.get('/', (req, res, next) => {
     console.log('get request in places')
     res.json(DUMMY_USERS)
+})
+
+router.post('/signup', (req, res, next) => {
+    const { username, password, email } = req.body
+
+    const createdUser = {
+        id: uuid(),
+        username,
+        password,
+        email
+    }
+    res.json({ userId: createdUser.id, email: createdUser.email })
+})
+
+router.post('/login', (req, res, next) => {
+    const { password, email } = req.body
+
+    const user = DUMMY_USERS.filter(user => user.email === email)
+
+    if (user[0].password !== password) {
+        res.json({ message: "error" })
+    } else {
+        res.json({ userId: user[0].id, email: user[0].email })
+    }
+
 })
 
 module.exports = router
