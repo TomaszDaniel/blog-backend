@@ -1,4 +1,5 @@
 const uuid = require('uuid/v4')
+const { validationResult } = require('express-validator')
 const HttpError = require('../models/http-error')
 
 const DUMMY_ARTICLES = [
@@ -27,6 +28,12 @@ const getArticles = (req, res, next) => {
 }
 
 const addArticle = (req, res, next) => {
+    const errors = validationResult(req)
+    if (!errors.isEmpty()) {
+        return next(
+            new HttpError('Invalid inputs passed please check your data', 422)
+        )
+    }
     const { title, text, author } = req.body
 
     const newArticle = {
@@ -42,6 +49,12 @@ const addArticle = (req, res, next) => {
 }
 
 const updateArticle = (req, res, next) => {
+    const errors = validationResult(req)
+    if (!errors.isEmpty()) {
+        return next(
+            new HttpError('Invalid inputs passed please check your data', 422)
+        )
+    }
     const articleId = req.params.aid
     const searchingArticle = DUMMY_ARTICLES.filter(article => article.id.toString() === articleId)
 
@@ -52,16 +65,19 @@ const updateArticle = (req, res, next) => {
     }
 
     const { title, text } = req.body
-
     searchingArticle[0].text = text
     searchingArticle[0].title = title
     res.json(searchingArticle)
 }
 
 const deleteArticle = (req, res, next) => {
-
     const articleIdToDelete = req.params.aid
     const articleIndex = DUMMY_ARTICLES.findIndex(article => article.id.toString() === articleIdToDelete)
+    if (articleIndex === -1) {
+        return next(
+            new HttpError('Could not find article for that id', 404)
+        )
+    }
     DUMMY_ARTICLES.splice(articleIndex, 1)
     res.json({ message: 'Deleted place.' })
 }

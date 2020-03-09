@@ -14,20 +14,19 @@ app.use('/api/articles', articlesRoute)
 app.use('/api/users', usersRoute)
 
 app.use((req, res, next) => {
-    const error = new HttpError("Could not find this xroute", 404)
-    throw error
+    return next(
+        new HttpError("Could not find this xroute", 404)
+    )
 })
 
 app.use((error, req, res, next) => {
-    if (res.headerSend) {
+    if (res.headerSent) {
         return next(error)
     } else {
         res.status(error.code || 500)
         res.json({ message: error.message || "An unknow error occurred!" })
     }
 })
-
-
 
 mongoose
     .connect("mongodb+srv://tomek:blog123@blogcluster-led8m.mongodb.net/myblogapp?retryWrites=true&w=majority")
